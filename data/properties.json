@@ -1,0 +1,709 @@
+[
+  {
+    "id": "duplex-unit-deluxe1",
+    "name": "Single Attached Duplex (Deluxe)",
+    "type": "duplex", 
+    "location": "Batangas",
+    "price": "0",
+    "lotArea": "66 sqm",  
+    "floorArea": "59.32 sqm",
+    "familyarea": {
+      "default": 1,
+      "options": [
+        3
+      ]
+    },
+    "bathrooms": {
+      "default": 1,
+      "options": [
+        2
+      ]
+    },
+    "images": {
+      "main": "Duplex Deluxe.png",
+      "interior": [
+        "duplex_img1.png",
+        "duplex_img2.png",
+        "duplex_img3.png",
+        "duplex_img4.png",
+        "duplex_img5.png"
+      ]
+    },
+    "floorPlans": {
+      "groundFloor": {
+        "image": "duplex_deluxe_GF new.jpg",
+        "areas": [
+          {
+            "name": "Porch",
+            "area": "2.25"
+          },
+          {
+            "name": "Foyer",
+            "area": "2.00"
+          },
+          {
+            "name": "Living Area",
+            "area": "6.65"
+          },
+          {
+            "name": "Hallway & Stair",
+            "area": "5.05"
+          },
+          {
+            "name": "Dining Area",
+            "area": "7.13"
+          },
+          {
+            "name": "Kitchen Area",
+            "area": "4.03"
+          },
+          {
+            "name": "Toilet & Bath",
+            "area": "2.60"
+          }
+        ]
+      },
+      "secondFloor": {
+        "image": "Duplex-Unit-Deluxe-SF new.jpg",
+        "areas": [
+          {
+            "name": "Hallway",
+            "area": "1.83"
+          },
+          {
+            "name": "Study Area",
+            "area": "3.92"
+          },
+          {
+            "name": "Master Bedroom",
+            "area": "11.16"
+          },
+          {
+            "name": "Bedroom 1",
+            "area": "6.65"
+          },
+          {
+            "name": "Toilet & Bath",
+            "area": "3.80"
+          },
+          {
+            "name": "Balcony",
+            "area": "2.25"
+          }
+        ]
+      }
+    }
+  },
+
+  {
+    "id": "duplex-unit-premiere",
+    "name": "Single Attached Duplex (Premiere)",
+    "type": "duplex",
+    "location": "Batangas",
+    "price": "0",
+    "lotArea": "66 sqm",
+    "floorArea": "59.32 sqm",
+    "bedrooms": {
+      "default": 1,
+      "options": [
+        3 , 2
+      ]
+    },
+    "bathrooms": {
+      "default": 2,
+      "options": [
+        2 , 2
+      ]
+    },
+    "images": {
+      "main": "Duplex Premiere.png",
+      "interior": [
+        "duplex_img1.png",
+        "duplex_img2.png",
+        "duplex_img3.png",
+        "duplex_img4.png",
+        "duplex_img5.png"
+      ]
+    },
+    "floorPlans": {
+      "groundFloor": {
+        "image": "Duplex-Unit-Premiere-GF new.jpg",
+        "areas": [
+          {
+            "name": "Porch",
+            "area": "2.25"
+          },
+          {
+            "name": "Foyer",
+            "area": "2.00"
+          },
+          {
+            "name": "Living Area",
+            "area": "6.65"
+          },
+          {
+            "name": "Hallway & Stair",
+            "area": "5.05"
+          },
+          {
+            "name": "Dining Area",
+            "area": "7.13"
+          },
+          {
+            "name": "Kitchen Area",
+            "area": "4.03"
+          },
+          {
+            "name": "Toilet & Bath",
+            "area": "2.60"
+          }
+        ]
+      },
+      "secondFloor": {
+        "image": "Duplex-Unit-Premiere-SF new.jpg",
+        "areas": [
+          {
+            "name": "Hallway",
+            "area": "1.83"
+          },
+          {
+            "name": "Study Area",
+            "area": "3.92"
+          },
+          {
+            "name": "Master Bedroom",
+            "area": "11.16"
+          },
+          {
+            "name": "Bedroom 1",
+            "area": "6.65"
+          },
+          {
+            "name": "Toilet & Bath",
+            "area": "3.80"
+          },
+          {
+            "name": "Balcony",
+            "area": "2.25"
+          }
+        ]
+      }
+    }
+  },
+
+  {
+    "id": "triplex-end-unit-a",
+    "name": "Triplex (End Unit A)",
+    "type": "triplex",
+    "location": "Batangas",
+    "price": "0",
+    "lotArea": "66 sqm",
+    "floorArea": "59.32 sqm",
+    "bedrooms": {
+      "default": 1,
+      "options": [
+        3
+      ]
+    },
+     "bathrooms": {
+      "default": 1,
+      "options": [
+        2
+      ]
+    },
+    "images": {
+      "main": "Triplex.png",
+      "interior": [
+        "end-interior1.jpg",
+        "end-interior2.jpg",
+        "end-interior3.jpg",
+        "end-interior4.jpg",
+        "end-interior5.jpg"
+      ]
+    },
+    "floorPlans": {
+      "groundFloor": {
+        "image": "Triplex-End-Unit-A-GF new.jpg",
+        "areas": [
+          {
+            "name": "Porch",
+            "area": "2.25"
+          },
+          {
+            "name": "Foyer",
+            "area": "2.00"
+          },
+          {
+            "name": "Living Area",
+            "area": "6.65"
+          },
+          {
+            "name": "Hallway & Stair",
+            "area": "5.05"
+          },
+          {
+            "name": "Dining Area",
+            "area": "7.13"
+          },
+          {
+            "name": "Kitchen Area",
+            "area": "4.03"
+          },
+          {
+            "name": "Toilet & Bath",
+            "area": "2.60"
+          }
+        ]
+      },
+      "secondFloor": {
+        "image": "Triplex-End-Unit-A-SF new.jpg",
+        "areas": [
+          {
+            "name": "Hallway",
+            "area": "1.83"
+          },
+          {
+            "name": "Study Area",
+            "area": "3.92"
+          },
+          {
+            "name": "Master Bedroom",
+            "area": "11.16"
+          },
+          {
+            "name": "Bedroom 1",
+            "area": "6.65"
+          },
+          {
+            "name": "Toilet & Bath",
+            "area": "3.80"
+          },
+          {
+            "name": "Balcony",
+            "area": "2.25"
+          }
+        ]
+      }
+    }
+  },
+
+  {
+    "id": "triplex-center-unit",
+    "name": "Triplex (Center Unit)",
+    "type": "triplex",
+    "location": "Batangas",
+    "price": "0",
+    "lotArea": "44.33 sqm",
+    "floorArea": "65.30 sqm",
+    "bedrooms": {
+      "default": 1,
+      "options": [
+        3
+      ]
+    },
+    "bathrooms": {
+      "default": 1,
+      "options": [
+        2
+      ]
+    },
+    "images": {
+      "main": "Triplex.png",
+      "interior": [
+        "end-interior1.jpg",
+        "end-interior2.jpg",
+        "end-interior3.jpg",
+        "end-interior4.jpg",
+        "end-interior5.jpg"
+      ]
+    },
+    "floorPlans": {
+      "groundFloor": {
+        "image": "Triplex-Center-Unit-GF new.jpg",
+        "areas": [
+          {
+            "name": "Porch",
+            "area": "2.25"
+          },
+          {
+            "name": "Foyer",
+            "area": "2.00"
+          },
+          {
+            "name": "Living Area",
+            "area": "6.65"
+          },
+          {
+            "name": "Hallway & Stair",
+            "area": "5.05"
+          },
+          {
+            "name": "Dining Area",
+            "area": "7.13"
+          },
+          {
+            "name": "Kitchen Area",
+            "area": "4.03"
+          },
+          {
+            "name": "Toilet & Bath",
+            "area": "2.60"
+          }
+        ]
+      },
+      "secondFloor": {
+        "image": "Triplex-Center-Unit-SF new.jpg",
+        "areas": [
+          {
+            "name": "Hallway",
+            "area": "1.83"
+          },
+          {
+            "name": "Study Area",
+            "area": "3.92"
+          },
+          {
+            "name": "Master Bedroom",
+            "area": "11.16"
+          },
+          {
+            "name": "Bedroom 1",
+            "area": "6.65"
+          },
+          {
+            "name": "Toilet & Bath",
+            "area": "3.80"
+          },
+          {
+            "name": "Balcony",
+            "area": "2.25"
+          }
+        ]
+      }
+    }
+  },
+
+  {
+    "id": "triplex-end-unit-b",
+    "name": "Triplex (End Unit B)",
+    "type": "triplex",
+    "location": "Batangas",
+    "price": "0",
+    "lotArea": "66 sqm",
+    "floorArea": "59.32 sqm",
+    "bedrooms": {
+      "default": 1,
+      "options": [
+        3
+      ]
+    },
+    "bathrooms": {
+      "default": 1,
+      "options": [
+        2
+      ]
+    },
+    "images": {
+      "main": "Triplex.png",
+      "interior": [
+        "end-interior1.jpg",
+        "end-interior2.jpg",
+        "end-interior3.jpg",
+        "end-interior4.jpg",
+        "end-interior5.jpg"
+      ]
+    },
+    "floorPlans": {
+      "groundFloor": {
+        "image": "Triplex-End-Unit-B-GF new.jpg",
+        "areas": [
+          {
+            "name": "Porch",
+            "area": "2.25"
+          },
+          {
+            "name": "Foyer",
+            "area": "2.00"
+          },
+          {
+            "name": "Living Area",
+            "area": "6.65"
+          },
+          {
+            "name": "Hallway & Stair",
+            "area": "5.05"
+          },
+          {
+            "name": "Dining Area",
+            "area": "7.13"
+          },
+          {
+            "name": "Kitchen Area",
+            "area": "4.03"
+          },
+          {
+            "name": "Toilet & Bath",
+            "area": "2.60"
+          }
+        ]
+      },
+      "secondFloor": {
+        "image": "Triplex-End-Unit-B-SF new.jpg",
+        "areas": [
+          {
+            "name": "Hallway",
+            "area": "1.83"
+          },
+          {
+            "name": "Study Area",
+            "area": "3.92"
+          },
+          {
+            "name": "Master Bedroom",
+            "area": "11.16"
+          },
+            {
+            "name": "Bedroom 1",
+            "area": "6.65"
+          },
+          {
+            "name": "Toilet & Bath",
+            "area": "3.80"
+          },
+          {
+            "name": "Balcony",
+            "area": "2.25"
+          }
+        ]
+      }
+    }
+  },
+
+  {
+    "id": "rowhouse-economic-unit",
+    "name": "Rowhouse (Economic Unit)",
+    "type": "rowhouse",
+    "location": "Batangas",
+    "price": "0",
+    "lotArea": "44 sqm",
+    "floorArea": "59.32 sqm",
+    "bedrooms": {
+      "default": 1
+    },
+    "bathrooms": {
+      "default": 1
+    },
+    "images": {
+      "main": "Rowhouse Economic.png",
+      "interior": [
+        "end-interior1.jpg",
+        "end-interior2.jpg",
+        "end-interior3.jpg",
+        "end-interior4.jpg",
+        "end-interior5.jpg"
+      ]
+    },
+    "floorPlans": {
+      "groundFloor": {
+        "image": "Economic-Unit-GF new.jpg",
+        "areas": [
+          {
+            "name": "Porch",
+            "area": "2.21"
+          },
+          {
+            "name": "Foyer",
+            "area": "2.26"
+          },
+          {
+            "name": "Living Area",
+            "area": "3.99"
+          },
+          {
+            "name": "Hallway and Stair",
+            "area": "2.21"
+          },
+          {
+            "name": "Dining Area",
+            "area": "8.22"
+          },
+          {
+            "name": "Kitchen Area",
+            "area": "3.96"
+          },
+          {
+            "name": "Toilet & Bath",
+            "area": "2.60"
+          }
+        ]
+      },
+      "secondFloor": {
+        "image": "Economic-Unit-SF new.jpg",
+        "areas": [
+          {
+            "name": "Hallway and Stair",
+            "area": "6.21"
+          },
+          {
+            "name": "Study Area",
+            "area": "3.11"
+          },
+          {
+            "name": "Balcony",
+            "area": "1.69"
+          },
+          {
+            "name": "Bedroom 1",
+            "area": "6.98"
+          },
+          {
+            "name": "Master Bedroom",
+            "area": "12.08"
+          },
+          {
+            "name": "Toilet & Bath",
+            "area": "3.80"
+          }
+        ]
+      }
+    }
+  },
+
+  {
+    "id": "rowhouse-compound-unit",
+    "name": "Rowhouse (Compound Unit)",
+    "type": "rowhouse",
+    "location": "Batangas",
+    "price": "0",
+    "lotArea": "40.58 sqm",
+    "floorArea": "50.51 sqm",
+    "bedrooms": {
+      "default": 1
+    },
+    "bathrooms": {
+      "default": 1
+    },
+    "images": {
+      "main": "Rowhouse Compound.png",
+      "interior": [
+        "compound_img1.png",
+        "compound_img2.png",
+        "compound_img3.png",
+        "compound_img4.png",
+        "compound_img5.png"
+      ]
+    },
+    "floorPlans": {
+      "groundFloor": {
+        "image": "Compound-Unit-GF new.jpg",
+        "areas": [
+          {
+            "name": "Living Area",
+            "area": "9.91"
+          },
+          {
+            "name": "Dining Area",
+            "area": "10.08"
+          },
+          {
+            "name": "Kitchen Area",
+            "area": "4.94"
+          },
+          {
+            "name": "Toilet & Bath",
+            "area": "2.67"
+          },
+          {
+            "name": "Hallway",
+            "area": "1.90"
+          }
+        ]
+      },
+      "secondFloor": {
+        "image": "Compound-Unit-Loft new.jpg",
+        "areas": [
+          {
+            "name": "Study",
+            "area": "4.03"
+          },
+          {
+            "name": "Bedroom 1",
+            "area": "15.08"
+          },
+          {
+            "name": "Hallway",
+            "area": "1.90"
+          }
+        ]
+      }
+    }
+  },
+
+  {
+    "id": "rowhouse-socialized-unit",
+    "name": "Rowhouse (Socialized Unit)",
+    "type": "rowhouse",
+    "location": "Batangas",
+    "price": "0",
+    "lotArea": "44.30 sqm",
+    "floorArea": "33.84 sqm",
+    "loft": {
+      "default": 1,
+      "options":[
+        1
+      ]
+    },
+    "bathrooms": {
+      "default": 1
+    },
+   "loftinfo": {
+      "default": 1
+    },
+    "images": {
+      "main": "Rowhouse Socialized.png",
+      "interior": [
+        "socialized_img1.png",
+        "socialized_img2.png",
+        "socialized_img3.png",
+        "socialized_img4.png",
+        "socialized_img5.png"
+      ]
+    },
+    "floorPlans": {
+      "groundFloor": {
+        "image": "Rowhouse-Socialized-Unit-GF new.jpg",
+        "areas": [
+          {
+            "name": "Porch",
+            "area": "1.76"
+          },
+          {
+            "name": "Foyer",
+            "area": "1.63"
+          },
+          {
+            "name": "Living Area",
+            "area": "9.41"
+          },
+          {
+            "name": "Dining Area",
+            "area": "7.41"
+          },
+          {
+            "name": "Kitchen Area",
+            "area": "3.66"
+          },
+          {
+            "name": "Toilet & Bath",
+            "area": "2.50"
+          },
+          {
+            "name": "Bedroom 1",
+            "area": "7.47"
+          }
+        ]
+      }
+    }
+  }
+
+]

@@ -1,0 +1,16 @@
+{
+  "name": "Vicmar Homes",
+  "short_name": "Vicmar",
+  "description": "Quality homes for Filipino families - San Jose Sico, Batangas City",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#166534",
+  "icons": [
+    {
+      "src": "/favicon.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    }
+  ]
+}

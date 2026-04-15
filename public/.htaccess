@@ -1,0 +1,27 @@
+# Apache hardening + SPA routing for Vicmar Homes
+Options -Indexes
+ServerSignature Off
+
+<IfModule mod_rewrite.c>
+  RewriteEngine On
+  RewriteBase /
+
+  # Block direct access to hidden and sensitive files
+  RewriteRule (^|/)\.(?!well-known/) - [F,L]
+  RewriteRule ^(src|scripts|node_modules|\.git)/ - [F,L]
+  RewriteRule ^(package\.json|package-lock\.json|pnpm-lock\.yaml|yarn\.lock|vite\.config\..*|credentials\.md)$ - [F,L]
+
+  # React/Vite SPA fallback
+  RewriteCond %{REQUEST_FILENAME} -f [OR]
+  RewriteCond %{REQUEST_FILENAME} -d
+  RewriteRule ^ - [L]
+  RewriteRule ^ index.html [L]
+</IfModule>
+
+<IfModule mod_headers.c>
+  Header always set X-Frame-Options "SAMEORIGIN"
+  Header always set X-Content-Type-Options "nosniff"
+  Header always set Referrer-Policy "strict-origin-when-cross-origin"
+  Header always set Permissions-Policy "camera=(), microphone=(), geolocation=()"
+  Header always set X-XSS-Protection "1; mode=block"
+</IfModule>
