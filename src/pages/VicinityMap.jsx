@@ -6,8 +6,10 @@ import { MapPin, ZoomIn, ZoomOut, Maximize2, Info, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useScrollReveal } from "@/hooks/useScrollReveal";
 import { subscribeToSlotStatuses } from "@/lib/slotStatusService";
+import { subscribeToPropertyPriceOverrides } from "@/lib/propertyPriceService";
 import { SLOT_STATUS_OPTIONS, getSlotStatusMeta, makeSlotId, normalizeSlotStatus } from "@/lib/slotStatus";
 import { getAllVicinityProperties, getPropertyUnitEntries } from "@/lib/vicinitySlots";
+import propertiesCatalog from "../../data/properties.json";
 
 const MAP_NATURAL_WIDTH = 1404;
 const MAP_NATURAL_HEIGHT = 908;
@@ -154,6 +156,7 @@ function getUnitInfo(property, slotStatuses) {
         ...unitEntry.data,
         lotNum: slotOverride.lotNum || unitEntry.data.lotNum,
         lotArea: slotOverride.lotArea ?? unitEntry.data.lotArea,
+        price: slotOverride.price ?? unitEntry.data?.price ?? property.info?.price ?? null,
       },
       status: effectiveStatus,
       statusMeta: getSlotStatusMeta(effectiveStatus),
@@ -263,7 +266,7 @@ function inferTypeFromCategory(category) {
   }
 
   if (normalizedCategory.includes("corner")) {
-    return "Corner Unit";
+    return "Corner Slot";
   }
 
   if (normalizedCategory.includes("triplex")) {
@@ -332,6 +335,15 @@ function getDisplayType(target, slotStatuses) {
   return baseType;
 }
 
+function formatPrice(value) {
+  if (value === null || value === undefined || value === "") return "-";
+  try {
+    return new Intl.NumberFormat('en-PH', { style: 'currency', currency: 'PHP', maximumFractionDigits: 0 }).format(Number(value));
+  } catch (e) {
+    return String(value);
+  }
+}
+
 export default function VicinityMap() {
   const navigate = useNavigate();
   const allProperties = useMemo(() => getAllVicinityProperties(), []);
@@ -344,6 +356,44 @@ export default function VicinityMap() {
   const [selectedTarget, setSelectedTarget] = useState(null);
   const [slotStatuses, setSlotStatuses] = useState({});
   const [statusSyncError, setStatusSyncError] = useState("");
+  const [priceOverrides, setPriceOverrides] = useState({});
+
+  const propertyImageMap = useMemo(() => {
+    const map = {};
+    try {
+      (propertiesCatalog || []).forEach((p) => {
+        if (p?.id) {
+          map[p.id] = p?.images?.main || null;
+          // also map a numeric-stripped id (some entries have trailing digits)
+          const m = String(p.id).match(/^(.*?)(\d+)$/);
+          if (m && m[1]) {
+            map[m[1]] = map[m[1]] || p?.images?.main || null;
+          }
+          // map by normalized name (slug-like) for added robustness
+          if (p?.name) {
+            const slug = String(p.name).toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '');
+            map[slug] = map[slug] || p?.images?.main || null;
+          }
+        }
+      });
+    } catch (e) {
+      // ignore
+    }
+    return map;
+  }, []);
+
+  const selectedImageUrl = useMemo(() => {
+    if (!selectedTarget?.prop) return null;
+    const displayType = getDisplayType(selectedTarget, slotStatuses);
+    const detailId = resolveDetailPropertyIdByUnitType(displayType);
+    const imageName = propertyImageMap[detailId] || propertyImageMap[displayType?.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '')] || null;
+    if (!imageName) return null;
+    try {
+      return new URL(`/src/images/properties/${imageName}`, import.meta.url).href;
+    } catch (e) {
+      return null;
+    }
+  }, [selectedTarget, slotStatuses, propertyImageMap]);
 
   // Pan & Zoom state
   const [scale, setScale] = useState(1);
@@ -353,7 +403,7 @@ export default function VicinityMap() {
   const translateStart = useRef({ x: 0, y: 0 });
 
   // Legend visibility
-  const [showLegend, setShowLegend] = useState(true);
+  // Legend visibility (removed per request)
 
   useEffect(() => {
     const unsubscribe = subscribeToSlotStatuses(
@@ -369,6 +419,41 @@ export default function VicinityMap() {
 
     return unsubscribe;
   }, []);
+
+  useEffect(() => {
+    const unsubscribe = subscribeToPropertyPriceOverrides(
+      (overrides) => setPriceOverrides(overrides || {}),
+      (err) => {
+        console.error("Price overrides subscription error", err);
+      },
+    );
+
+    return unsubscribe;
+  }, []);
+
+  // Auto-scroll to the map when this page mounts so users land on the vicinity map
+  useEffect(() => {
+    const t = setTimeout(() => {
+      try {
+        if (mapRef.current && typeof mapRef.current.scrollIntoView === 'function') {
+          mapRef.current.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }
+      } catch (e) {
+        // ignore
+      }
+    }, 120);
+
+    return () => clearTimeout(t);
+  }, []);
+
+  function resolveUnitPrice(unit, prop) {
+    // Prefer explicit unit price, then property-level override, then property.info price
+    if (unit?.data?.price != null) return unit.data.price;
+    const propOverride = priceOverrides[prop?.id];
+    if (propOverride && Number.isFinite(propOverride.price)) return propOverride.price;
+    if (prop?.info?.price != null) return prop.info.price;
+    return null;
+  }
 
   const handleZoomIn = () => {
     setScale(prev => Math.min(prev * 1.3, 5));
@@ -529,15 +614,7 @@ export default function VicinityMap() {
             <h2 className="text-xl font-bold text-[#16a34a]">Community Layout</h2>
             <p className="text-gray-500 text-sm mt-1">Hover over a lot to see details · Click to view more info · Scroll to zoom</p>
           </div>
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() => setShowLegend(!showLegend)}
-            className="map-control gap-2 border-[#16a34a] text-[#16a34a] hover:bg-[#16a34a]/5"
-          >
-            <Info className="w-4 h-4" />
-            {showLegend ? "Hide Legend" : "Show Legend"}
-          </Button>
+          {/* Legend removed per user request */}
         </div>
 
         {statusSyncError ? (
@@ -546,31 +623,18 @@ export default function VicinityMap() {
           </p>
         ) : null}
 
-        {/* Legend */}
-        {showLegend && (
-          <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-5 mb-4">
-            <p className="text-xs font-semibold text-[#16a34a] uppercase tracking-wider mb-3">Property Type (Outline)</p>
-            <div className="flex flex-wrap gap-x-6 gap-y-2 mb-4">
-              {legendItems.map((item) => (
-                <div key={item.label} className="flex items-center gap-2">
-                  <div className="w-4 h-3 rounded border-2" style={{ borderColor: item.color }} />
-                  <span className="text-sm text-gray-600">{item.label}</span>
-                </div>
-              ))}
-            </div>
-            <div className="border-t border-gray-100 pt-3">
-              <p className="text-xs font-semibold text-[#16a34a] uppercase tracking-wider mb-2">Availability</p>
-              <div className="flex flex-wrap gap-x-6 gap-y-2">
-                {SLOT_STATUS_OPTIONS.map((status) => (
-                  <div key={status.value} className="flex items-center gap-2">
-                    <div className={`w-2.5 h-2.5 rounded-full ${status.dotClass}`} />
-                    <span className="text-sm text-gray-600">{status.label}</span>
-                  </div>
-                ))}
+        {/* Availability Legend */}
+        <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-4 mb-4">
+          <p className="text-xs font-semibold text-[#16a34a] uppercase tracking-wider mb-2">Availability</p>
+          <div className="flex flex-wrap gap-x-6 gap-y-2">
+            {SLOT_STATUS_OPTIONS.map((status) => (
+              <div key={status.value} className="flex items-center gap-2">
+                <div className={`w-2.5 h-2.5 rounded-full ${status.dotClass}`} />
+                <span className="text-sm text-gray-600">{status.label}</span>
               </div>
-            </div>
+            ))}
           </div>
-        )}
+        </div>
 
         {/* Map Container */}
         <div
@@ -691,51 +755,68 @@ export default function VicinityMap() {
             <div
               className="tooltip-card absolute z-30 pointer-events-none"
               style={{
-                left: `${Math.min(tooltipPos.x + 16, (containerRef.current?.clientWidth || 999) - 260)}px`,
-                top: `${Math.min(tooltipPos.y - 10, (containerRef.current?.clientHeight || 999) - 180)}px`,
+                left: `${Math.min(tooltipPos.x + 16, (containerRef.current?.clientWidth || 999) - 440)}px`,
+                top: `${Math.min(tooltipPos.y - 10, (containerRef.current?.clientHeight || 999) - 260)}px`,
               }}
             >
-              <div className="bg-white text-gray-800 p-4 rounded-xl shadow-xl border border-gray-100 min-w-[220px] max-w-[280px]">
-                <div className="flex items-center gap-2 mb-2">
-                  <MapPin className="w-3.5 h-3.5 text-[#16a34a] flex-shrink-0" />
-                  <span className="text-xs text-[#16a34a] font-semibold uppercase tracking-wider">
-                    Block {hoveredTarget.prop.info.blockNum} · {hoveredTarget.prop.info.phase}
-                  </span>
-                </div>
-                <h3 className="text-sm font-bold text-[#16a34a] mb-3">
-                  {getDisplayType(hoveredTarget, slotStatuses)}
-                  {hoveredTarget.unit?.key ? ` · Unit ${hoveredTarget.unit.key}` : ""}
-                </h3>
+              {(() => {
+                const displayType = getDisplayType(hoveredTarget, slotStatuses);
+                const detailId = resolveDetailPropertyIdByUnitType(displayType);
+                const imageName = propertyImageMap[detailId];
+                const imageUrl = imageName ? new URL(`/src/images/properties/${imageName}`, import.meta.url).href : null;
+                const units = hoveredTarget.unit
+                  ? [hoveredTarget.unit]
+                  : getUnitInfo(hoveredTarget.prop, slotStatuses);
 
-                {(() => {
-                  const units = hoveredTarget.unit
-                    ? [hoveredTarget.unit]
-                    : getUnitInfo(hoveredTarget.prop, slotStatuses);
-                  if (units.length === 0) return null;
-                  return (
-                    <div className="space-y-1.5">
-                      {units.map((u, i) => (
-                        <div key={i} className="flex items-center justify-between text-xs bg-gray-50 rounded-lg px-2.5 py-1.5">
-                          <span className="text-gray-600">
-                            {u.key ? `Unit ${u.key} · ` : ""}Lot {u.data.lotNum}
-                            <span className="text-gray-400 ml-1">({u.data.lotArea} sqm)</span>
-                          </span>
-                          <span className="flex items-center gap-1.5">
-                            <span className={`w-1.5 h-1.5 rounded-full ${u.statusMeta.dotClass}`} />
-                            <span className={`font-semibold ${u.statusMeta.textClass}`}>
-                              {u.statusMeta.label}
-                            </span>
+                return (
+                  <div className="bg-white text-gray-800 p-4 rounded-xl shadow-xl border border-gray-100 min-w-[320px] max-w-[480px]">
+                    <div className="flex gap-4">
+                      {imageUrl ? (
+                        <div className="w-44 h-28 flex-shrink-0 overflow-hidden rounded-md shadow-sm border border-gray-100 bg-gray-50 flex items-center justify-center">
+                          <img src={imageUrl} alt={displayType || "property"} className="w-full h-full object-contain" draggable={false} />
+                        </div>
+                      ) : null}
+
+                      <div className="flex-1">
+                        <div className="flex items-center gap-2 mb-2">
+                          <MapPin className="w-3.5 h-3.5 text-[#16a34a] flex-shrink-0" />
+                          <span className="text-xs text-[#16a34a] font-semibold uppercase tracking-wider">
+                            Block {hoveredTarget.prop.info.blockNum} · {hoveredTarget.prop.info.phase}
                           </span>
                         </div>
-                      ))}
-                    </div>
-                  );
-                })()}
+                        <h3 className="text-sm font-bold text-[#16a34a] mb-2">
+                          {displayType}
+                          {hoveredTarget.unit?.key ? ` · Unit ${hoveredTarget.unit.key}` : ""}
+                        </h3>
 
-                <div className="mt-3 pt-2 border-t border-gray-100">
-                  <p className="text-[10px] text-gray-400">Click for more details</p>
-                </div>
-              </div>
+                        {units.length > 0 ? (
+                          <div className="space-y-1.5">
+                            {units.map((u, i) => (
+                              <div key={i} className="flex items-center justify-between text-xs bg-gray-50 rounded-lg px-2.5 py-1.5">
+                                <div className="text-gray-600 flex flex-col">
+                                  <span>{u.key ? `Unit ${u.key} · ` : ""}Lot {u.data.lotNum}</span>
+                                  <span className="text-gray-400 text-[11px]">{u.data.lotArea} sqm</span>
+                                  {resolveUnitPrice(u, hoveredTarget.prop) != null && (
+                                    <span className="text-sm font-semibold text-[#16a34a] mt-1">{formatPrice(resolveUnitPrice(u, hoveredTarget.prop))}</span>
+                                  )}
+                                </div>
+                                <span className="flex items-center gap-1.5">
+                                  <span className={`w-1.5 h-1.5 rounded-full ${u.statusMeta.dotClass}`} />
+                                  <span className={`font-semibold ${u.statusMeta.textClass}`}>{u.statusMeta.label}</span>
+                                </span>
+                              </div>
+                            ))}
+                          </div>
+                        ) : null}
+
+                        <div className="mt-3 pt-2 border-t border-gray-100">
+                          <p className="text-[10px] text-gray-400">Click for more details</p>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                );
+              })()}
             </div>
           )}
         </div>
@@ -785,6 +866,11 @@ export default function VicinityMap() {
 
             {/* Modal Body */}
             <div className="p-6">
+              {selectedImageUrl ? (
+                <div className="mb-4">
+                  <img src={selectedImageUrl} alt={getDisplayType(selectedTarget, slotStatuses) || "property"} className="w-full h-64 object-contain rounded-md border border-gray-100 bg-gray-50 p-1" draggable={false} />
+                </div>
+              ) : null}
               {(() => {
                 const units = selectedTarget.unit
                   ? [selectedTarget.unit]
@@ -818,6 +904,9 @@ export default function VicinityMap() {
                             {u.key ? `Unit ${u.key} — ` : ""}Lot {u.data.lotNum}
                           </p>
                           <p className="text-xs text-gray-400 mt-0.5">{u.data.lotArea} sqm</p>
+                          {resolveUnitPrice(u, selectedTarget.prop) != null && (
+                            <p className="text-sm font-semibold text-[#16a34a] mt-1">{formatPrice(resolveUnitPrice(u, selectedTarget.prop))}</p>
+                          )}
                         </div>
                         <div className="flex items-center gap-2">
                           <span className={`w-2.5 h-2.5 rounded-full ${u.statusMeta.dotClass}`} />

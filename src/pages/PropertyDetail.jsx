@@ -39,6 +39,8 @@ export default function PropertyDetail() {
   const urlParams = new URLSearchParams(window.location.search);
   const propertyId = urlParams.get("id");
   const requestedTourParam = urlParams.get("tour");
+  const requestedShowFloor = urlParams.get("showFloorPlan");
+  const requestedFloorKey = urlParams.get("floor");
   const requestedTourType = requestedTourParam === "interior" ? "interior" : "exterior";
   const queryClient = useQueryClient();
 
@@ -80,6 +82,23 @@ export default function PropertyDetail() {
       setDidAutoOpenRequestedTour(true);
     }
   }, [didAutoOpenRequestedTour, property, requestedTourParam, requestedTourType]);
+
+  useEffect(() => {
+    if (!property) return;
+    if (requestedShowFloor === "true") {
+      let plan = null;
+      if (requestedFloorKey && property.floor_plans && property.floor_plans[requestedFloorKey]) {
+        plan = property.floor_plans[requestedFloorKey];
+      } else if (property.floor_plans) {
+        plan = property.floor_plans.groundFloor || Object.values(property.floor_plans)[0];
+      }
+
+      if (plan) {
+        setSelectedFloorPlan(plan);
+        setShowFloorPlan(true);
+      }
+    }
+  }, [property, requestedShowFloor, requestedFloorKey]);
 
   if (isLoading) {
     return (
@@ -178,12 +197,12 @@ export default function PropertyDetail() {
       </div>
 
       {/* Cinematic Gallery */}
-      <div className="relative bg-black" style={{ height: "clamp(320px, 55vh, 600px)" }}>
+      <div className="relative bg-black flex items-center justify-center" style={{ height: "clamp(320px, 55vh, 600px)" }}>
         <img
           key={currentImageIndex}
           src={allImages[currentImageIndex]}
           alt={property.title}
-          className="gallery-img w-full h-full object-cover opacity-90"
+          className="gallery-img w-full h-full object-contain opacity-100 object-center"
         />
 
         {/* Dark gradient for readability */}
@@ -357,7 +376,7 @@ export default function PropertyDetail() {
                       <img
                         src={property.floor_plans.groundFloor.image}
                         alt="Ground Floor Plan"
-                        className="w-full h-52 object-cover group-hover:scale-105 transition-transform duration-400"
+                        className="w-full h-auto object-contain max-h-[60vh] transition-transform duration-400"
                       />
                       <div className="absolute inset-0 bg-black/0 group-hover:bg-black/15 transition-colors flex items-center justify-center">
                         <Maximize className="w-7 h-7 text-white opacity-0 group-hover:opacity-100 transition-opacity" />
@@ -377,7 +396,7 @@ export default function PropertyDetail() {
                       <img
                         src={property.floor_plans.secondFloor.image}
                         alt="Second Floor Plan"
-                        className="w-full h-52 object-cover group-hover:scale-105 transition-transform duration-400"
+                        className="w-full h-auto object-contain max-h-[60vh] transition-transform duration-400"
                       />
                       <div className="absolute inset-0 bg-black/0 group-hover:bg-black/15 transition-colors flex items-center justify-center">
                         <Maximize className="w-7 h-7 text-white opacity-0 group-hover:opacity-100 transition-opacity" />
@@ -462,7 +481,9 @@ export default function PropertyDetail() {
             <DialogTitle>Photo Gallery</DialogTitle>
           </DialogHeader>
           <div className="relative">
-            <img src={allImages[currentImageIndex]} alt="" className="w-full max-h-[70vh] object-contain rounded-lg" />
+            <div className="w-full max-h-[70vh] overflow-hidden rounded-lg bg-black">
+              <img src={allImages[currentImageIndex]} alt="" className="w-full h-full object-cover" />
+            </div>
             {allImages.length > 1 && (
               <>
                 <button onClick={prevImage} className="absolute left-2 top-1/2 -translate-y-1/2 bg-white/90 p-2 rounded-full shadow">

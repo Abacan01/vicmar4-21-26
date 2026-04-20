@@ -129,7 +129,8 @@ const mockProperties = [
     floor_area: 65.30,
     lot_area: 44.33,
     status: "available",
-    main_image: triplexImg,
+    // use cornerUnitImg for visual variation in listings
+    main_image: cornerUnitImg,
     gallery_images: [duplexInt1, duplexInt2, duplexInt3, duplexInt4, duplexInt5],
     floor_plans: {
       groundFloor: { image: triplexCenterGF, label: "Ground Floor" },
@@ -150,7 +151,8 @@ const mockProperties = [
     floor_area: 59.32,
     lot_area: 66,
     status: "reserved",
-    main_image: triplexImg,
+    // use a different main image to avoid identical cards
+    main_image: cornerUnitImg,
     gallery_images: [duplexInt1, duplexInt2, duplexInt3, duplexInt4, duplexInt5],
     floor_plans: {
       groundFloor: { image: triplexEndBGF, label: "Ground Floor" },

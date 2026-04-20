@@ -16,7 +16,7 @@ export const SLOT_PROPERTY_TYPE_OPTIONS = [
 	{ value: "Triplex (Center Unit)", label: "Triplex (Center Unit)" },
 	{ value: "Triplex (End Unit A)", label: "Triplex (End Unit A)" },
 	{ value: "Triplex (End Unit B)", label: "Triplex (End Unit B)" },
-	{ value: "Corner Unit", label: "Corner Unit" },
+	{ value: "Corner Slot", label: "Corner Slot" },
 ];
 
 export const PROPERTY_TYPE_LABELS = Object.freeze(

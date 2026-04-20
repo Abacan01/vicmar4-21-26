@@ -3,10 +3,10 @@ import { Link } from "react-router-dom";
 import { createPageUrl } from "../../utils";
 import { useScrollReveal } from "@/hooks/useScrollReveal";
 import { Navigation, MapPin, ExternalLink } from "lucide-react";
-import compoundImg1 from "@/images/properties/Interior/compound_img1.png";
-import duplexImg1 from "@/images/properties/Interior/duplex_img1.png";
-import compoundImg2 from "@/images/properties/Interior/compound_img2.png";
-import socializedImg1 from "@/images/properties/Interior/socialized_img1.png";
+import cornerUnitImg from "@/images/properties/Corner Unit.png";
+import propImgB from "@/images/properties/Duplex Deluxe.png";
+import propImgC from "@/images/properties/Rowhouse Compound.png";
+import propImgD from "@/images/properties/Triplex.png";
 
 const TOLLWAY_URL =
   "https://www.google.com/maps/dir/STAR+Tollway,+Batangas/Randy's+store,+P5PH%2B532,+Batangas+City,+Batangas/@13.842405,121.128617,75691m/data=!3m1!1e3!4m14!4m13!1m5!1m1!1s0x33bd6c47c81960ad:0xb202f8fcae4d8cc4!2m2!1d121.1421878!2d13.9497285!1m5!1m1!1s0x33bd197c66633f33:0xf3269378daf86148!2m2!1d121.177656!2d13.7353748!3e0?hl=en&entry=ttu";
@@ -82,19 +82,31 @@ export default function IntroductionSection() {
           <Reveal delay={80}>
             <div className="grid grid-cols-2 gap-3 h-full">
               {[
-                { src: compoundImg1, alt: "Community compound" },
-                { src: duplexImg1,   alt: "Duplex exterior" },
-                { src: compoundImg2, alt: "Community lifestyle" },
-                { src: socializedImg1, alt: "Socialized housing" },
+                { src: cornerUnitImg, alt: "Corner Unit" },
+                { src: propImgB, alt: "Duplex Deluxe" },
+                { src: propImgC, alt: "Rowhouse Compound" },
+                { src: propImgD, alt: "Triplex" },
               ].map((img, i) => (
                 <div key={i} className="overflow-hidden rounded-xl">
-                  <img
-                    src={img.src}
-                    alt={img.alt}
-                    className="intro-img w-full h-[200px] object-cover"
-                  />
+                  <Link to={createPageUrl("Properties")} className="block">
+                    <img
+                      src={img.src}
+                      alt={img.alt}
+                      className="intro-img w-full h-[200px] object-cover"
+                    />
+                  </Link>
                 </div>
               ))}
+
+              {/* Button below images on large screens */}
+              <div className="col-span-2 mt-3 text-center md:text-left">
+                <Link
+                  to={createPageUrl("Properties")}
+                  className="inline-block bg-[#16a34a] hover:bg-[#22c55e] text-white font-semibold px-6 py-2 rounded-full transition-colors text-sm"
+                >
+                  View Properties
+                </Link>
+              </div>
             </div>
           </Reveal>
 

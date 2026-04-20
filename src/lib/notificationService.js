@@ -92,7 +92,7 @@ export function subscribeToAdminNotifications(onNotificationsChange, onError) {
       if (isFirstChatSnapshot) {
         isFirstChatSnapshot = false;
 
-        // Generate notifications for active chats requesting live agent
+        // Generate notifications for active chats requesting assistance
         snapshot.forEach((doc) => {
           const data = doc.data();
           if (data.liveAgentRequested && data.status !== "resolved") {
@@ -100,7 +100,7 @@ export function subscribeToAdminNotifications(onNotificationsChange, onError) {
             notifications.push({
               id: `chat-init-${doc.id}`,
               type: "chat_request",
-              title: "Live Agent Requested",
+              title: "Assistance Requested",
               message: `${data.visitorLabel || "A visitor"} is waiting for support`,
               timestamp: updatedAt.toISOString(),
               read: false,
@@ -153,7 +153,7 @@ export function subscribeToAdminNotifications(onNotificationsChange, onError) {
             });
           }
 
-          // Live agent request
+          // Assistance request
           if (data.liveAgentRequested && data.status === "awaiting-agent") {
             const notifId = `chat-agent-${change.doc.id}`;
             if (notifications.some((n) => n.id === notifId)) return;
@@ -161,7 +161,7 @@ export function subscribeToAdminNotifications(onNotificationsChange, onError) {
             notifications.push({
               id: notifId,
               type: "chat_request",
-              title: "Live Agent Requested",
+              title: "Assistance Requested",
               message: `${data.visitorLabel || "A visitor"} needs support assistance`,
               timestamp: updatedAt.toISOString(),
               read: false,

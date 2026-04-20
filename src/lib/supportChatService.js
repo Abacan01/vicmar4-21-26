@@ -27,7 +27,7 @@ export const SUPPORT_CHAT_IDLE_TIMEOUT_MS = 5 * 60 * 1000;
 const FIRESTORE_RETRY_DELAY_MS = 250;
 
 export const DEFAULT_SUPPORT_WELCOME_MESSAGE = "Hi! I am Vicmar assistant. Choose a question below or type your own question.";
-export const DEFAULT_SUPPORT_LIVE_AGENT_REQUESTED_MESSAGE = "Live agent request submitted. An admin will reply here soon.";
+export const DEFAULT_SUPPORT_LIVE_AGENT_REQUESTED_MESSAGE = "Assistance requested. An admin will reply here soon.";
 
 export const DEFAULT_SUPPORT_FAQ_ITEMS = [
   {
@@ -52,7 +52,9 @@ export const DEFAULT_SUPPORT_FAQ_ITEMS = [
   },
 ];
 
-export const DEFAULT_SUPPORT_BOT_FALLBACK_ANSWER = "Thanks for your question. I can help with payment options, amenities, purchase process, and fees. If you need more help, tap Request live agent.";
+export const DEFAULT_SUPPORT_BOT_FALLBACK_ANSWER = "Thanks for your question. I can help with payment options, amenities, purchase process, and fees. If you need more help, tap Need Assistance.";
+
+const CONTACT_PROMPT = "Before I connect you to assistance, please provide your full name and email (example: Name: Juan Dela Cruz, Email: juan@example.com). Our admin will follow up if there are additional concerns.";
 
 let supportSessionsCache = [];
 let supportAuthPromise = null;
@@ -714,7 +716,77 @@ export async function appendUserMessage(chatId, text) {
     logUnexpectedError(error);
   }
 
+  // After saving the user message, check if we're expecting contact info and handle it.
+  try {
+    const currentSession = getSupportSession(chatId);
+    // Use the raw trimmed text to detect contact info
+    await handlePotentialContactInfo(chatId, trimmed, currentSession);
+  } catch (e) {
+    // non-fatal
+    console.error('handlePotentialContactInfo error', e);
+  }
+
   return nextSession;
+}
+
+// After appending a user message, if the last system prompt asked for contact info,
+// capture name/email and proceed to request assistance automatically.
+async function handlePotentialContactInfo(chatId, userText, currentSession) {
+  if (!currentSession) return;
+  const lastSystem = (currentSession.messages || []).slice().reverse().find(m => m.sender === 'system');
+  if (!lastSystem || String(lastSystem.text ?? '').trim() !== CONTACT_PROMPT) return;
+
+  // Try to extract an email
+  const emailMatch = userText.match(/([a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,})/i);
+  const email = emailMatch ? emailMatch[1].toLowerCase() : null;
+
+  // Derive name: remove email from text and look for 'name:' prefix
+  let name = userText.replace(emailMatch ? emailMatch[0] : '', '').replace(/\bname\s*[:\-]/i, '').replace(/[,\n]/g, ' ').trim();
+  if (!name) {
+    // fallback to first two words
+    const parts = userText.split(/\s+/).filter(Boolean).slice(0, 2);
+    name = parts.join(' ') || null;
+  }
+
+  const visitorLabel = name ? name : (email ? `Visitor ${email.split('@')[0]}` : currentSession.visitorLabel);
+
+  // If we found at least an email, persist visitorLabel and add a confirmation system message, then request assistance.
+  if (email) {
+    const createdAt = nowIso();
+    try {
+      // Persist visitorLabel and an internal visitorEmail as a system confirmation message (visitorEmail not stored in top-level fields)
+      await mutateSession(chatId, (session) => {
+        const next = {
+          ...session,
+          visitorLabel: visitorLabel,
+          updatedAt: createdAt,
+          messages: [
+            ...(session.messages ?? []),
+            {
+              id: generateId('msg'),
+              sender: 'system',
+              text: `Contact details saved: ${visitorLabel} · ${email}`,
+              createdAt,
+            },
+          ],
+        };
+
+        return next;
+      }, { forceFirestore: true, fallbackOnError: false });
+
+      // Now actually request live agent / assistance
+      await requestLiveAgent(chatId);
+    } catch (e) {
+      console.error('Failed to persist contact info or request assistance:', e);
+    }
+  } else {
+    // If no email found, ask user to include a valid email
+    try {
+      await appendBotMessage(chatId, 'Please include a valid email address so our admin can follow up (example: name@example.com).');
+    } catch (e) {
+      console.error('Failed to send follow-up bot message:', e);
+    }
+  }
 }
 
 export async function appendBotMessage(chatId, text) {
@@ -778,6 +850,28 @@ export async function requestLiveAgent(chatId) {
       }
 
       const createdAt = nowIso();
+
+      // If this is an early request and we don't have a visitor label (anonymous visitor),
+      // first ask for contact details (name + email) so admin can follow up. Do not mark
+      // the session as awaiting-agent yet.
+      const messageCount = Array.isArray(session.messages) ? session.messages.length : 0;
+      const isAnonymousVisitor = String(session.visitorLabel || "").toLowerCase().startsWith("visitor");
+
+      if (messageCount <= 2 && isAnonymousVisitor) {
+        return {
+          ...session,
+          updatedAt: createdAt,
+          messages: [
+            ...(session.messages ?? []),
+            {
+              id: generateId("msg"),
+              sender: "system",
+              text: CONTACT_PROMPT,
+              createdAt,
+            },
+          ],
+        };
+      }
 
       return {
         ...session,
@@ -872,7 +966,7 @@ export async function requestLiveAgent(chatId) {
   }
 
   if (!nextSession) {
-    throw new Error("Unable to request live agent right now. Please try again.");
+    throw new Error("Unable to request assistance right now. Please try again.");
   }
 
   return nextSession;

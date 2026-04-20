@@ -12,7 +12,7 @@ export default function RecentListings({ properties = [], isLoading }) {
           <div className="flex justify-between items-center mb-12">
             <h2 className="text-3xl md:text-4xl font-bold text-[#16a34a]">Recent Listings</h2>
           </div>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-8">
             {[1, 2, 3, 4, 5, 6].map((i) => (
               <div key={i} className="bg-gray-100 rounded-xl h-96 animate-pulse" />
             ))}
@@ -41,7 +41,7 @@ export default function RecentListings({ properties = [], isLoading }) {
             No properties available yet. Check back soon!
           </div>
         ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-8">
             {properties.slice(0, 9).map((property) => (
               <PropertyCard key={property.id} property={property} />
             ))}

@@ -158,7 +158,7 @@ function getRuleBasedBotReply(question, slots, assistantConfig) {
   const requestedType = detectPropertyTypeIntent(q);
 
   if (containsAny(q, ["hello", "hi", "good morning", "good afternoon", "good evening", "hey"])) {
-    return "Hello. I can help with unit availability, prices, lot sizes, financing, and site visit scheduling. Ask anything or tap Request live agent for direct assistance.";
+  return "Hello. I can help with unit availability, prices, lot sizes, financing, and site visit scheduling. Ask anything or tap Need Assistance for direct help.";
   }
 
   if (containsAny(q, ["thank you", "thanks", "tnx", "salamat"])) {
@@ -178,7 +178,7 @@ function getRuleBasedBotReply(question, slots, assistantConfig) {
     const summary = summarizeAvailability(slots, requestedType);
     if (summary) {
       const scopeLabel = requestedType ? `${requestedType} units` : "all units";
-      return `Current ${scopeLabel} status: ${summary.available} available, ${summary.reserved} reserved, and ${summary.notAvailable} not available (total ${summary.total}). For exact lot numbers, please open Subdivision Plan or ask for a live agent.`;
+      return `Current ${scopeLabel} status: ${summary.available} available, ${summary.reserved} reserved, and ${summary.notAvailable} not available (total ${summary.total}). For exact lot numbers, please open Subdivision Plan or ask for assistance.`;
     }
   }
 
@@ -210,7 +210,7 @@ function getRuleBasedBotReply(question, slots, assistantConfig) {
     }
 
     if (requestedType) {
-      return `I do not have a confirmed price value yet for ${requestedType} units in the current live data. Tap Request live agent so we can provide an updated quotation.`;
+      return `I do not have a confirmed price value yet for ${requestedType} units in the current live data. Tap Need Assistance so we can provide an updated quotation.`;
     }
 
     return "I can help with estimated pricing, but I need the unit type first (for example: duplex, triplex, rowhouse).";
@@ -224,27 +224,27 @@ function getRuleBasedBotReply(question, slots, assistantConfig) {
   }
 
   if (q.includes("payment") || q.includes("financing") || q.includes("pag ibig") || q.includes("pag-ibig") || q.includes("loan")) {
-    return "We support flexible payment options including bank financing, Pag-IBIG, in-house financing, and spot cash options. I can connect you to a live agent to discuss exact computations and requirements.";
+    return "We support flexible payment options including bank financing, Pag-IBIG, in-house financing, and spot cash options. I can connect you to assistance to discuss exact computations and requirements.";
   }
 
   if (containsAny(q, ["requirement", "requirements", "documents", "docs", "what do i need", "requirements for"] )) {
-    return "Typical requirements include valid IDs, proof of billing/address, proof of income, and financing-specific forms. Exact requirements depend on your chosen financing option, so a live agent can send a complete checklist.";
+    return "Typical requirements include valid IDs, proof of billing/address, proof of income, and financing-specific forms. Exact requirements depend on your chosen financing option, so assistance can send a complete checklist.";
   }
 
   if (containsAny(q, ["site visit", "tripping", "visit", "schedule", "appointment"])) {
-    return "We can help schedule your site visit. Please share your preferred date and time, or tap Request live agent so we can finalize your appointment quickly.";
+    return "We can help schedule your site visit. Please share your preferred date and time, or tap Need Assistance so we can finalize your appointment quickly.";
   }
 
   if (containsAny(q, ["promo", "discount", "discounts", "offer", "offers", "special offer"])) {
-    return "Promos and discounts can vary by unit type and payment terms. For the latest active promos and exact computation, tap Request live agent and we will assist you directly.";
+    return "Promos and discounts can vary by unit type and payment terms. For the latest active promos and exact computation, tap Need Assistance and we will assist you directly.";
   }
 
   if (containsAny(q, ["turnover", "move in", "move-in", "ready for occupancy", "rfo", "occupancy"])) {
-    return "Turnover timelines depend on the selected unit and project schedule. A live agent can confirm the most updated expected turnover for your preferred lot.";
+    return "Turnover timelines depend on the selected unit and project schedule. Assistance can confirm the most updated expected turnover for your preferred lot.";
   }
 
   if (containsAny(q, ["contact", "phone", "email", "call", "reach"] )) {
-    return "You can use the Contact Us page for direct details, or tap Request live agent here and an admin will continue the conversation in this chat.";
+    return "You can use the Contact Us page for direct details, or tap Need Assistance here and an admin will continue the conversation in this chat.";
   }
 
   if (q.includes("amenit") || q.includes("garden") || q.includes("playground") || q.includes("community")) {
@@ -252,7 +252,7 @@ function getRuleBasedBotReply(question, slots, assistantConfig) {
   }
 
   if (q.includes("location") || q.includes("where") || q.includes("vicinity") || q.includes("map")) {
-    return "You can explore exact lot placement in the Subdivision Plan page for block, phase, and unit-level details. If you need guided recommendations, tap Request live agent.";
+    return "You can explore exact lot placement in the Subdivision Plan page for block, phase, and unit-level details. If you need guided recommendations, tap Need Assistance.";
   }
 
   const matchedItem = assistantConfig.faqItems.find((item) => {
@@ -566,14 +566,14 @@ export default function Layout({ children, currentPageName }) {
             toast.success("Chat session refreshed. Live agent request sent.");
             return;
           } catch (retryError) {
-            const retryMessage = String(retryError?.message ?? "Unable to request live agent right now.");
+            const retryMessage = String(retryError?.message ?? "Unable to request assistance right now.");
             setChatInputError(retryMessage);
             toast.error(retryMessage);
             return;
           }
         }
 
-        const message = String(error?.message ?? "Unable to request live agent right now.");
+        const message = String(error?.message ?? "Unable to request assistance right now.");
         setChatInputError(message);
         toast.error(message);
       }
@@ -620,14 +620,14 @@ export default function Layout({ children, currentPageName }) {
           toast.success("Chat session refreshed. Live agent request sent.");
           return;
         } catch (retryError) {
-          const retryMessage = String(retryError?.message ?? "Unable to request live agent right now.");
+          const retryMessage = String(retryError?.message ?? "Unable to request assistance right now.");
           setChatInputError(retryMessage);
           toast.error(retryMessage);
           return;
         }
       }
 
-      const message = String(error?.message ?? "Unable to request live agent right now.");
+      const message = String(error?.message ?? "Unable to request assistance right now.");
       setChatInputError(message);
       toast.error(message);
     }
@@ -676,6 +676,7 @@ export default function Layout({ children, currentPageName }) {
   const navLinks = [
     { name: "Home", page: "Home" },
     { name: "Properties", page: "Properties" },
+    { name: "Subdivision Plan", page: "VicinityMap" },
     { name: "Amenities", page: "Amenities" },
     { name: "About Us", page: "AboutUs" },
   ];
@@ -696,7 +697,6 @@ export default function Layout({ children, currentPageName }) {
     { name: "Duplex Units", to: createPageUrl("Properties") + "#duplex" },
     { name: "Triplex Units", to: createPageUrl("Properties") + "#triplex" },
     { name: "Rowhouse Units", to: createPageUrl("Properties") + "#rowhouse" },
-    { name: "Subdivision Plan", to: createPageUrl("VicinityMap") },
   ];
 
   const handleDropdownClick = (e, targetHash, pageName) => {
@@ -1178,7 +1178,7 @@ export default function Layout({ children, currentPageName }) {
                         disabled={chatSession?.liveAgentRequested}
                         className="text-xs font-semibold px-3 py-1.5 rounded-full bg-blue-50 text-blue-700 border border-blue-200 hover:bg-blue-100 disabled:opacity-55 disabled:cursor-not-allowed"
                       >
-                        {chatSession?.liveAgentRequested ? "Live agent requested" : "Request live agent"}
+                        {chatSession?.liveAgentRequested ? "Assistance requested" : "Need Assistance"}
                       </button>
                       <button
                         type="button"

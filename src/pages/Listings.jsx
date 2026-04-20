@@ -239,7 +239,7 @@ export default function Listings() {
             <Button variant="outline" onClick={clearFilters}>Clear Filters</Button>
           </div>
         ) : (
-          <div className={`grid gap-8 ${viewMode === "grid" ? "grid-cols-1 md:grid-cols-2 lg:grid-cols-3" : "grid-cols-1"}`}>
+          <div className={`grid gap-8 ${viewMode === "grid" ? "grid-cols-1 md:grid-cols-2 lg:grid-cols-2" : "grid-cols-1"}`}>
             {filteredProperties.map((property, idx) => (
               <div key={property.id} className="listing-card" style={{ animationDelay: `${idx * 60}ms` }}>
                 <PropertyCard property={property} showTourButtons />

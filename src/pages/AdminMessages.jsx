@@ -807,13 +807,13 @@ export default function AdminMessages() {
                            placeholder="Initial message shown when a new chat starts"
                         />
 
-                        <label className="block text-xs font-semibold text-slate-500 mt-3 mb-1">Live agent requested message</label>
+                        <label className="block text-xs font-semibold text-slate-500 mt-3 mb-1">Assistance requested message</label>
                         <textarea
                            value={assistantDraft.automationMessages?.liveAgentRequestedMessage ?? ""}
                            onChange={(event) => handleAssistantAutoMessageChange("liveAgentRequestedMessage", event.target.value)}
                            rows={3}
                            className="w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm text-slate-700 focus:outline-none focus:ring-2 focus:ring-emerald-200"
-                           placeholder="System message shown after user taps Request live agent"
+                           placeholder="System message shown after user taps Need Assistance"
                         />
                      </div>
 
