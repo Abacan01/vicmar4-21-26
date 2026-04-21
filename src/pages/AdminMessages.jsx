@@ -23,6 +23,61 @@ import {
 } from "@/lib/supportChatService";
 
 const ADMIN_AGENT_NAME_KEY = "vicmar_admin_agent_name";
+const EMAIL_PATTERN = /([a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,})/i;
+
+function getSessionContactDetails(session) {
+   if (!session) {
+      return {
+         displayName: "Visitor",
+         name: "",
+         email: "",
+      };
+   }
+
+   const directName = String(session.visitorName ?? "").trim();
+   const directEmail = String(session.visitorEmail ?? "").trim().toLowerCase();
+
+   if (directName || directEmail) {
+      return {
+         displayName: directName || session.visitorLabel || "Visitor",
+         name: directName,
+         email: directEmail,
+      };
+   }
+
+   const systemMessages = Array.isArray(session.messages) ? [...session.messages].reverse() : [];
+
+   for (const message of systemMessages) {
+      if (message.sender !== "system") {
+         continue;
+      }
+
+      const text = String(message.text ?? "").trim();
+      if (!text.toLowerCase().startsWith("contact details saved:")) {
+         continue;
+      }
+
+      const detailsText = text.replace(/^contact details saved:\s*/i, "").trim();
+      const emailMatch = detailsText.match(EMAIL_PATTERN);
+      const parsedEmail = emailMatch ? emailMatch[1].toLowerCase() : "";
+      const parsedName = detailsText
+         .replace(parsedEmail, "")
+         .replace(/[\u00B7|,-]\s*$/, "")
+         .trim();
+
+      return {
+         displayName: parsedName || session.visitorLabel || "Visitor",
+         name: parsedName,
+         email: parsedEmail,
+      };
+   }
+
+   return {
+      displayName: session.visitorLabel || "Visitor",
+      name: "",
+      email: "",
+   };
+}
 
 export default function AdminMessages() {
    const [activeTab, setActiveTab] = useState("live-console");
@@ -78,6 +133,7 @@ export default function AdminMessages() {
       (nextSessions) => {
         const queue = nextSessions.filter((session) => session.liveAgentRequested);
         setSupportSessions(queue);
+            setSyncError("");
 
         setActiveSupportSessionId((currentId) => {
           if (currentId && queue.some((session) => session.id === currentId)) {
@@ -88,7 +144,16 @@ export default function AdminMessages() {
       },
       (error) => {
         console.error(error);
-        setSyncError("Unable to sync live agent chat right now.");
+            const isPermissionError =
+               error?.code === "permission-denied"
+               || String(error?.message ?? "").includes("Missing or insufficient permissions");
+
+            if (isPermissionError) {
+               setSyncError("");
+               return;
+            }
+
+            setSyncError("Live chat sync encountered a temporary issue. Retrying automatically.");
       },
       { allowAnonymous: false },
     );
@@ -147,6 +212,11 @@ export default function AdminMessages() {
     () => supportSessions.find((session) => session.id === activeSupportSessionId) ?? null,
     [supportSessions, activeSupportSessionId],
   );
+
+   const activeSessionContactDetails = useMemo(
+      () => getSessionContactDetails(activeSupportSession),
+      [activeSupportSession],
+   );
 
   useEffect(() => {
     if (!supportMessagesRef.current) return;
@@ -517,6 +587,7 @@ export default function AdminMessages() {
                          currentSessions.map((session) => {
                            const isSelected = session.id === activeSupportSessionId;
                            const lastMessage = session.messages?.[session.messages.length - 1];
+                                        const contactDetails = getSessionContactDetails(session);
 
                            return (
                              <button
@@ -530,12 +601,15 @@ export default function AdminMessages() {
                              >
                                <div className="flex items-center justify-between mb-1.5">
                                  <p className={`text-[13.5px] font-bold truncate pr-2 ${isSelected ? "text-slate-900" : "text-slate-700"}`}>
-                                    {session.visitorLabel}
+                                                      {contactDetails.displayName}
                                  </p>
                                  <span className={`flex-shrink-0 text-[10px] font-bold px-2 py-0.5 rounded-full ${getSessionStatusClassName(session.status)}`}>
                                    {getSessionStatusLabel(session.status)}
                                  </span>
                                </div>
+                                              <p className="text-[11px] text-slate-500 line-clamp-1 mb-1">
+                                                   {contactDetails.email || `Session ${session.id.slice(-6).toUpperCase()}`}
+                                              </p>
                                <p className="text-xs text-slate-500 line-clamp-1">{lastMessage?.text ?? "Started chat..."}</p>
                              </button>
                            );
@@ -572,11 +646,18 @@ export default function AdminMessages() {
                          <div className="px-6 py-4 border-b border-slate-200/60 flex items-center justify-between bg-white/80 backdrop-blur-xl z-10 w-full shadow-sm">
                             <div className="flex items-center gap-3">
                                <div className="w-10 h-10 rounded-full bg-gradient-to-tr from-[#15803d]/20 to-emerald-400/20 text-[#15803d] flex items-center justify-center font-black text-sm uppercase border border-[#15803d]/20 shadow-inner">
-                                  {activeSupportSession.visitorLabel?.[0] || 'U'}
+                                                   {activeSessionContactDetails.displayName?.[0] || 'U'}
                                </div>
                                <div>
-                                  <p className="text-[15px] font-bold text-slate-900">{activeSupportSession.visitorLabel}</p>
-                                  <p className="text-[11px] text-slate-500 font-medium tracking-wide">Session ID: {activeSupportSession.id.slice(-8).toUpperCase()}</p>
+                                                   <p className="text-[15px] font-bold text-slate-900">{activeSessionContactDetails.displayName}</p>
+                                                   <div className="flex flex-wrap items-center gap-2 mt-0.5">
+                                                      <p className="text-[11px] text-slate-500 font-medium tracking-wide">Session ID: {activeSupportSession.id.slice(-8).toUpperCase()}</p>
+                                                      {activeSessionContactDetails.email ? (
+                                                         <span className="text-[11px] font-semibold text-emerald-700 bg-emerald-50 border border-emerald-100 px-2 py-0.5 rounded-full">
+                                                            {activeSessionContactDetails.email}
+                                                         </span>
+                                                      ) : null}
+                                                   </div>
                                </div>
                             </div>
                             <div className="flex items-center gap-2">
@@ -664,7 +745,7 @@ export default function AdminMessages() {
 
                          {activeSupportSession.typing?.user && activeSupportSession.status !== "closed" ? (
                             <div className="px-6 py-2 border-b border-slate-100 bg-white/70 text-[11px] text-blue-700 font-semibold">
-                               {activeSupportSession.visitorLabel} is typing...
+                                 {activeSessionContactDetails.displayName} is typing...
                             </div>
                          ) : null}
 

@@ -9,7 +9,6 @@ import {
   Clock,
   Home, 
   MapPinned, 
-  MessageCircle,
   PhilippinePeso,
   TrendingUp
 } from "lucide-react";
@@ -242,20 +241,6 @@ export default function AdminDashboard() {
                   <div className="flex-1">
                     <p className="font-bold text-zinc-800 group-hover:text-[#15803d] transition-colors">Unit Pricing</p>
                     <p className="text-xs font-medium text-zinc-500">Adjust model costs</p>
-                  </div>
-                  <ArrowRight className="w-4 h-4 text-zinc-400 group-hover:text-[#15803d] transition-colors" />
-                </Link>
-
-                <Link
-                  to={createPageUrl("AdminMessages")}
-                  className="group flex items-center gap-4 p-5 rounded-2xl bg-white/50 hover:bg-white/80 border border-white/40 hover:border-green-200 shadow-sm hover:shadow-md transition-all duration-300"
-                >
-                  <div className="w-12 h-12 rounded-xl bg-green-50 border border-green-100 text-[#15803d] flex items-center justify-center group-hover:bg-[#15803d] group-hover:text-white group-hover:shadow-md transition-all duration-300">
-                    <MessageCircle className="w-5 h-5" />
-                  </div>
-                  <div className="flex-1">
-                    <p className="font-bold text-zinc-800 group-hover:text-[#15803d] transition-colors">Messages</p>
-                    <p className="text-xs font-medium text-zinc-500">Live chat support</p>
                   </div>
                   <ArrowRight className="w-4 h-4 text-zinc-400 group-hover:text-[#15803d] transition-colors" />
                 </Link>

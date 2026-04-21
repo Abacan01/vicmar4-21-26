@@ -1,11 +1,10 @@
 import React, { useEffect } from "react";
 import { Link } from "react-router-dom";
 import { createPageUrl } from "../utils";
-import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { Button } from "@/components/ui/button";
+import { useQuery } from "@tanstack/react-query";
 import { Building, Building2, Home, ArrowRight } from "lucide-react";
 import { useScrollReveal } from "@/hooks/useScrollReveal";
-import { getPropertiesWithLivePrices, subscribeToPropertyPriceOverrides } from "@/lib/propertyPriceService";
+import { getPropertiesWithLivePrices } from "@/lib/propertyPriceService";
 
 import duplexImg from '@/images/properties/Duplex Deluxe.png';
 import triplexImg from '@/images/properties/Triplex.png';
@@ -35,6 +34,9 @@ const propertyTypes = [
   },
 ];
 
+/**
+ * @param {{ children: import("react").ReactNode, delay?: number, className?: string }} props
+ */
 function Reveal({ children, delay = 0, className = "" }) {
   const ref = useScrollReveal({ threshold: 0.12, triggerOnce: true });
   return (
@@ -49,8 +51,6 @@ function Reveal({ children, delay = 0, className = "" }) {
 }
 
 export default function Properties() {
-  const queryClient = useQueryClient();
-
   useEffect(() => {
     const hash = window.location.hash.replace('#', '');
     if (hash) {
@@ -65,37 +65,13 @@ export default function Properties() {
     queryFn: () => getPropertiesWithLivePrices(),
   });
 
-  useEffect(() => {
-    const unsubscribe = subscribeToPropertyPriceOverrides(
-      () => {
-        queryClient.invalidateQueries({ queryKey: ["properties-count"] });
-      },
-      (error) => {
-        console.error(error);
-      },
-    );
+  /** @type {Array<{ property_type?: string }>} */
+  const typedProperties = allProperties;
 
-    return unsubscribe;
-  }, [queryClient]);
-
-  const getTypeCount = (type) => allProperties.filter(p => p.property_type === type).length;
-  const getTypeStartingPrice = (type) => {
-    const props = allProperties.filter(p => p.property_type === type);
-    if (props.length === 0) return null;
-
-    const prices = props
-      .map((property) => {
-        const minPrice = Number(property.minPrice ?? property.price);
-        return Number.isFinite(minPrice) ? minPrice : null;
-      })
-      .filter(Boolean);
-
-    if (prices.length === 0) return null;
-
-    const startingPrice = Math.min(...prices);
-    const format = (v) => new Intl.NumberFormat('en-PH', { style: 'currency', currency: 'PHP', maximumFractionDigits: 0 }).format(v);
-    return format(startingPrice);
-  };
+  /**
+   * @param {string} type
+   */
+  const getTypeCount = (type) => typedProperties.filter((property) => property.property_type === type).length;
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -107,12 +83,12 @@ export default function Properties() {
       `}</style>
 
       {/* Header */}
-      <div className="bg-[#15803d] py-20 px-4 relative overflow-hidden">
+      <div className="bg-[#15803d] py-8 md:py-9 px-4 relative overflow-hidden">
         <div className="absolute inset-0 opacity-5" style={{ backgroundImage: 'radial-gradient(circle at 20% 50%, white 1px, transparent 1px), radial-gradient(circle at 80% 20%, white 1px, transparent 1px)', backgroundSize: '40px 40px' }} />
         <div className="relative max-w-7xl mx-auto text-center page-header">
-          <p className="text-[#86efac] text-xs font-semibold uppercase tracking-widest mb-3">What We Build</p>
-          <h1 className="text-4xl md:text-5xl font-bold text-white mb-4">Our Properties</h1>
-          <p className="text-gray-300 text-lg max-w-xl mx-auto">
+          <p className="text-[#86efac] text-[10px] sm:text-[11px] font-semibold uppercase tracking-widest mb-1.5">What We Build</p>
+          <h1 className="text-2xl md:text-3xl font-bold text-white mb-1.5">Our Properties</h1>
+          <p className="text-gray-300 text-sm max-w-xl mx-auto">
             Quality homes designed to meet every lifestyle and budget.
           </p>
         </div>
@@ -123,7 +99,6 @@ export default function Properties() {
           {propertyTypes.map((item, index) => {
             const Icon = item.icon;
             const count = getTypeCount(item.type);
-            const startingPrice = getTypeStartingPrice(item.type);
             const isReversed = index % 2 === 1;
 
             return (
@@ -162,18 +137,11 @@ export default function Properties() {
                     <h2 className="text-3xl font-bold text-[#16a34a]">{item.label}</h2>
                     <p className="text-gray-600 leading-relaxed">{item.description}</p>
 
-                    {startingPrice && (
-                      <div className="bg-[#16a34a]/5 rounded-xl p-4 border border-[#16a34a]/10">
-                        <p className="text-xs text-gray-500 mb-1 uppercase tracking-wide">Starting Price</p>
-                        <p className="text-2xl font-bold text-[#16a34a]">{startingPrice}</p>
-                      </div>
-                    )}
-
                     <Link to={createPageUrl("PropertyTypeUnits") + `?type=${item.type}`}>
-                      <Button className="bg-[#16a34a] hover:bg-[#22c55e] gap-2 rounded-full px-6 mt-2">
+                      <span className="inline-flex items-center gap-2 bg-[#16a34a] hover:bg-[#22c55e] text-white font-semibold rounded-full px-6 py-2.5 mt-2 transition-colors">
                         View {item.label}
                         <ArrowRight className="w-4 h-4" />
-                      </Button>
+                      </span>
                     </Link>
                   </div>
                 </Reveal>

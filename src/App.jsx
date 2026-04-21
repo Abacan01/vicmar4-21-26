@@ -10,17 +10,23 @@ import UserNotRegisteredError from '@/components/UserNotRegisteredError';
 import ModernLoader from '@/components/ModernLoader';
 
 import AdminLayout from '@/components/AdminLayout';
+import SupportAdminLayout from '@/components/SupportAdminLayout';
 
 const { Pages, Layout, mainPage } = pagesConfig;
 const mainPageKey = mainPage ?? Object.keys(Pages)[0];
 const MainPage = mainPageKey ? Pages[mainPageKey] : <></>;
 
 const ADMIN_PAGES_NO_LAYOUT = new Set(["AdminLogin"]);
-const ADMIN_PAGES_WITH_LAYOUT = new Set(["AdminDashboard", "AdminSlots", "AdminPropertyPricing", "AdminMessages"]);
+const ADMIN_PAGES_WITH_LAYOUT = new Set(["AdminDashboard", "AdminSlots", "AdminPropertyPricing"]);
+const SUPPORT_ADMIN_PAGES_WITH_LAYOUT = new Set(["AdminMessages"]);
 
 const LayoutWrapper = ({ children, currentPageName }) => {
   if (ADMIN_PAGES_WITH_LAYOUT.has(currentPageName)) {
     return <AdminLayout currentPageName={currentPageName}>{children}</AdminLayout>;
+  }
+
+  if (SUPPORT_ADMIN_PAGES_WITH_LAYOUT.has(currentPageName)) {
+    return <SupportAdminLayout currentPageName={currentPageName}>{children}</SupportAdminLayout>;
   }
   
   if (!Layout || ADMIN_PAGES_NO_LAYOUT.has(currentPageName)) {

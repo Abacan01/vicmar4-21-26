@@ -292,6 +292,8 @@ function toWritableMessage(rawMessage, index = 0) {
 
 function normalizeSession(sessionId, rawSession) {
   const visitorId = String(rawSession?.visitorId ?? "");
+  const visitorName = String(rawSession?.visitorName ?? "").trim();
+  const visitorEmail = String(rawSession?.visitorEmail ?? "").trim().toLowerCase();
   const normalizedMessages = Array.isArray(rawSession?.messages)
     ? rawSession.messages.map((message, index) => normalizeMessage(message, index))
     : [];
@@ -304,6 +306,8 @@ function normalizeSession(sessionId, rawSession) {
     status: String(rawSession?.status ?? "bot"),
     liveAgentRequested: Boolean(rawSession?.liveAgentRequested),
     visitorId,
+    visitorName,
+    visitorEmail,
     visitorLabel: String(rawSession?.visitorLabel ?? `Visitor ${(visitorId || sessionId).slice(-4).toUpperCase()}`),
     typing: {
       user: Boolean(rawSession?.typing?.user),
@@ -326,6 +330,8 @@ function stripSessionForWrite(session) {
     status: String(session.status ?? "bot"),
     liveAgentRequested: session.liveAgentRequested,
     visitorId: String(session.visitorId ?? ""),
+    visitorName: String(session.visitorName ?? "").trim(),
+    visitorEmail: String(session.visitorEmail ?? "").trim().toLowerCase(),
     visitorLabel: String(session.visitorLabel ?? "Visitor"),
     typing: {
       user: Boolean(session.typing?.user),
@@ -355,6 +361,8 @@ function createSessionObject(visitorId, welcomeMessage = DEFAULT_SUPPORT_WELCOME
     status: "bot",
     liveAgentRequested: false,
     visitorId: resolvedVisitorId,
+    visitorName: "",
+    visitorEmail: "",
     visitorLabel: `Visitor ${resolvedVisitorId.slice(-4).toUpperCase()}`,
     typing: {
       user: false,
@@ -748,16 +756,20 @@ async function handlePotentialContactInfo(chatId, userText, currentSession) {
     name = parts.join(' ') || null;
   }
 
-  const visitorLabel = name ? name : (email ? `Visitor ${email.split('@')[0]}` : currentSession.visitorLabel);
+  const visitorName = name || "";
+  const visitorEmail = email || "";
+  const visitorLabel = visitorName ? visitorName : (visitorEmail ? `Visitor ${visitorEmail.split('@')[0]}` : currentSession.visitorLabel);
 
   // If we found at least an email, persist visitorLabel and add a confirmation system message, then request assistance.
-  if (email) {
+  if (visitorEmail) {
     const createdAt = nowIso();
     try {
       // Persist visitorLabel and an internal visitorEmail as a system confirmation message (visitorEmail not stored in top-level fields)
       await mutateSession(chatId, (session) => {
         const next = {
           ...session,
+          visitorName,
+          visitorEmail,
           visitorLabel: visitorLabel,
           updatedAt: createdAt,
           messages: [
@@ -765,7 +777,7 @@ async function handlePotentialContactInfo(chatId, userText, currentSession) {
             {
               id: generateId('msg'),
               sender: 'system',
-              text: `Contact details saved: ${visitorLabel} · ${email}`,
+              text: `Contact details saved: ${visitorLabel} · ${visitorEmail}`,
               createdAt,
             },
           ],

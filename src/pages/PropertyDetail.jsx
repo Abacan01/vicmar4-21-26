@@ -22,6 +22,63 @@ const typeLabels = {
   rowhouse: "Rowhouse",
 };
 
+function getSplitUnitGuideConfig(property) {
+  if (!property) {
+    return null;
+  }
+
+  const propertyType = String(property.property_type ?? "").toLowerCase();
+  const title = String(property.title ?? "").toLowerCase();
+  const isDuplex = propertyType === "duplex" || title.includes("duplex");
+
+  if (!isDuplex) {
+    return null;
+  }
+
+  const isDeluxe = title.includes("deluxe");
+  const isPremiere = title.includes("premiere");
+
+  return {
+    leftLabel: "Deluxe",
+    rightLabel: "Premiere",
+    selectedSide: isDeluxe ? "left" : isPremiere ? "right" : null,
+  };
+}
+
+function SplitUnitGuideOverlay({ config }) {
+  const selectedSide = config?.selectedSide ?? null;
+  const leftLabel = config?.leftLabel ?? "Left Unit";
+  const rightLabel = config?.rightLabel ?? "Right Unit";
+
+  const leftSideClass = selectedSide === "left"
+    ? "bg-emerald-500/18"
+    : selectedSide === "right"
+      ? "bg-slate-950/40"
+      : "bg-slate-950/25";
+
+  const rightSideClass = selectedSide === "right"
+    ? "bg-emerald-500/18"
+    : selectedSide === "left"
+      ? "bg-slate-950/40"
+      : "bg-slate-950/25";
+
+  return (
+    <div className="pointer-events-none absolute inset-0 z-10">
+      <div className="absolute inset-0 bg-gradient-to-b from-black/10 via-transparent to-black/10" />
+      <div className={`absolute inset-y-0 left-0 w-1/2 ${leftSideClass}`} />
+      <div className={`absolute inset-y-0 right-0 w-1/2 ${rightSideClass}`} />
+      <div className="absolute inset-y-0 left-1/2 -translate-x-1/2 w-[3px] bg-white/90 shadow-[0_0_0_1px_rgba(15,23,42,0.15)]" />
+
+      <div className={`absolute bottom-2 left-2 rounded-full text-white text-[10px] font-bold px-2 py-1 uppercase tracking-wide shadow-sm ${selectedSide === "left" ? "bg-emerald-600/95" : "bg-slate-600/95"}`}>
+        {leftLabel}
+      </div>
+      <div className={`absolute bottom-2 right-2 rounded-full text-white text-[10px] font-bold px-2 py-1 uppercase tracking-wide shadow-sm ${selectedSide === "right" ? "bg-emerald-600/95" : "bg-slate-600/95"}`}>
+        {rightLabel}
+      </div>
+    </div>
+  );
+}
+
 function Reveal({ children, delay = 0, className = "" }) {
   const ref = useScrollReveal({ threshold: 0.08, triggerOnce: true });
   return (
@@ -38,11 +95,19 @@ function Reveal({ children, delay = 0, className = "" }) {
 export default function PropertyDetail() {
   const urlParams = new URLSearchParams(window.location.search);
   const propertyId = urlParams.get("id");
+  const sourcePage = String(urlParams.get("from") ?? "");
+  const sourceType = String(urlParams.get("type") ?? "").toLowerCase().trim();
   const requestedTourParam = urlParams.get("tour");
   const requestedShowFloor = urlParams.get("showFloorPlan");
   const requestedFloorKey = urlParams.get("floor");
   const requestedTourType = requestedTourParam === "interior" ? "interior" : "exterior";
   const queryClient = useQueryClient();
+
+  const cameFromTypeUnits = sourcePage === "PropertyTypeUnits" && Boolean(sourceType);
+  const backUrl = cameFromTypeUnits
+    ? `${createPageUrl("PropertyTypeUnits")}?type=${encodeURIComponent(sourceType)}`
+    : createPageUrl("Properties");
+  const backLabel = cameFromTypeUnits ? "Back to Unit Listings" : "Back to Properties";
 
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const [showGallery, setShowGallery] = useState(false);
@@ -142,6 +207,7 @@ export default function PropertyDetail() {
     sold:      { label: "Sold",     className: "bg-red-500 text-white border-0" },
   };
   const status = statusConfig[property.status] || statusConfig.available;
+  const splitGuideConfig = getSplitUnitGuideConfig(property);
 
   return (
     <div className="min-h-screen bg-gray-50 pb-24">
@@ -179,17 +245,17 @@ export default function PropertyDetail() {
 
       {/* Back Bar */}
       <div className="bg-white border-b border-gray-100 page-header">
-        <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex items-center justify-between">
+        <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-3 flex items-center justify-between gap-3">
           <Link
-            to={createPageUrl("Properties")}
-            className="inline-flex items-center gap-2 text-gray-500 hover:text-[#16a34a] transition-colors text-sm font-medium"
+            to={backUrl}
+            className="inline-flex items-center gap-2 text-gray-500 hover:text-[#16a34a] transition-colors text-xs sm:text-sm font-medium"
           >
             <ArrowLeft className="w-4 h-4" />
-            Back to Properties
+            {backLabel}
           </Link>
           <div className="flex items-center gap-2">
-            <Badge className={status.className}>{status.label}</Badge>
-            <Badge variant="outline" className="text-[#16a34a] border-[#16a34a]/30">
+            <Badge className={`${status.className} text-xs px-2 py-0.5`}>{status.label}</Badge>
+            <Badge variant="outline" className="text-[#16a34a] border-[#16a34a]/30 text-xs px-2 py-0.5">
               {typeLabels[property.property_type] || property.property_type}
             </Badge>
           </div>
@@ -381,6 +447,7 @@ export default function PropertyDetail() {
                       <div className="absolute inset-0 bg-black/0 group-hover:bg-black/15 transition-colors flex items-center justify-center">
                         <Maximize className="w-7 h-7 text-white opacity-0 group-hover:opacity-100 transition-opacity" />
                       </div>
+                      {splitGuideConfig ? <SplitUnitGuideOverlay config={splitGuideConfig} /> : null}
                     </div>
                     <p className="mt-2.5 text-center text-sm font-semibold text-[#16a34a]">
                       {property.floor_plans.groundFloor.label || "Ground Floor"}
@@ -401,6 +468,7 @@ export default function PropertyDetail() {
                       <div className="absolute inset-0 bg-black/0 group-hover:bg-black/15 transition-colors flex items-center justify-center">
                         <Maximize className="w-7 h-7 text-white opacity-0 group-hover:opacity-100 transition-opacity" />
                       </div>
+                      {splitGuideConfig ? <SplitUnitGuideOverlay config={splitGuideConfig} /> : null}
                     </div>
                     <p className="mt-2.5 text-center text-sm font-semibold text-[#16a34a]">
                       {property.floor_plans.secondFloor.label || "Second Floor"}
@@ -546,35 +614,49 @@ export default function PropertyDetail() {
 
       {/* Floor Plan Modal */}
       <Dialog open={showFloorPlan} onOpenChange={setShowFloorPlan}>
-        <DialogContent className="max-w-4xl max-h-[90vh]">
-          <DialogHeader>
-            <DialogTitle>{selectedFloorPlan?.label || "Floor Plan"}</DialogTitle>
-          </DialogHeader>
-          <div className="overflow-auto">
-            <img src={selectedFloorPlan?.image} alt="Floor Plan" className="w-full max-h-[70vh] object-contain" />
-          </div>
-          {property.floor_plans && Object.keys(property.floor_plans).length > 1 && (
-            <div className="flex gap-4 pt-4 border-t">
-              {property.floor_plans.groundFloor && (
-                <Button
-                  variant={selectedFloorPlan === property.floor_plans.groundFloor ? "default" : "outline"}
-                  onClick={() => setSelectedFloorPlan(property.floor_plans.groundFloor)}
-                  className="flex-1"
-                >
-                  {property.floor_plans.groundFloor.label || "Ground Floor"}
-                </Button>
-              )}
-              {property.floor_plans.secondFloor && (
-                <Button
-                  variant={selectedFloorPlan === property.floor_plans.secondFloor ? "default" : "outline"}
-                  onClick={() => setSelectedFloorPlan(property.floor_plans.secondFloor)}
-                  className="flex-1"
-                >
-                  {property.floor_plans.secondFloor.label || "Second Floor"}
-                </Button>
-              )}
+        <DialogContent className="max-w-4xl w-[96vw] h-[90vh] !p-0 gap-0 overflow-hidden bg-white/95 border-slate-200 shadow-2xl backdrop-blur-xl">
+          <div className="flex h-full w-full flex-col">
+            <div className="flex items-center justify-between gap-3 border-b border-slate-200 bg-slate-50 px-5 py-4 text-slate-900">
+              <div>
+                <p className="text-[11px] uppercase tracking-wider text-slate-500 font-semibold">Floor Plan</p>
+                <h2 className="text-lg font-bold">{selectedFloorPlan?.label || "Floor Plan"}</h2>
+              </div>
             </div>
-          )}
+
+            <div className="relative flex-1 min-h-0 overflow-hidden bg-slate-100 p-4">
+              <img
+                src={selectedFloorPlan?.image}
+                alt="Floor Plan"
+                className="block h-full w-full object-contain"
+              />
+              {splitGuideConfig ? <SplitUnitGuideOverlay config={splitGuideConfig} /> : null}
+            </div>
+
+            {property.floor_plans && Object.keys(property.floor_plans).length > 1 && (
+              <div className="shrink-0 border-t border-slate-200 bg-slate-50 px-4 py-4">
+                <div className="flex gap-4">
+                  {property.floor_plans.groundFloor && (
+                    <Button
+                      variant={selectedFloorPlan === property.floor_plans.groundFloor ? "default" : "outline"}
+                      onClick={() => setSelectedFloorPlan(property.floor_plans.groundFloor)}
+                      className="flex-1"
+                    >
+                      {property.floor_plans.groundFloor.label || "Ground Floor"}
+                    </Button>
+                  )}
+                  {property.floor_plans.secondFloor && (
+                    <Button
+                      variant={selectedFloorPlan === property.floor_plans.secondFloor ? "default" : "outline"}
+                      onClick={() => setSelectedFloorPlan(property.floor_plans.secondFloor)}
+                      className="flex-1"
+                    >
+                      {property.floor_plans.secondFloor.label || "Second Floor"}
+                    </Button>
+                  )}
+                </div>
+              </div>
+            )}
+          </div>
         </DialogContent>
       </Dialog>
     </div>

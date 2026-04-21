@@ -120,12 +120,12 @@ export default function Listings() {
       `}</style>
 
       {/* Header */}
-      <div className="bg-[#15803d] py-20 px-4 relative overflow-hidden">
+      <div className="bg-[#15803d] py-8 md:py-10 px-4 relative overflow-hidden">
         <div className="absolute inset-0 opacity-5" style={{ backgroundImage: 'radial-gradient(circle at 20% 50%, white 1px, transparent 1px), radial-gradient(circle at 80% 20%, white 1px, transparent 1px)', backgroundSize: '40px 40px' }} />
         <div className="relative max-w-7xl mx-auto text-center page-header">
-          <p className="text-[#86efac] text-xs font-semibold uppercase tracking-widest mb-3">Browse & Discover</p>
-          <h1 className="text-4xl md:text-5xl font-bold text-white mb-4">Property Listings</h1>
-          <p className="text-gray-300 text-lg">Browse all available properties from Vicmar Homes</p>
+          <p className="text-[#86efac] text-[10px] sm:text-xs font-semibold uppercase tracking-widest mb-2">Browse &amp; Discover</p>
+          <h1 className="text-2xl md:text-3xl font-bold text-white mb-1.5">Property Listings</h1>
+          <p className="text-gray-300 text-sm md:text-base">Browse all available properties from Vicmar Homes</p>
         </div>
       </div>
 

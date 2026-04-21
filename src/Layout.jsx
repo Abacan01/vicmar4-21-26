@@ -304,6 +304,7 @@ function isPermissionError(error) {
 }
 
 export default function Layout({ children, currentPageName }) {
+  const isViewportFitPage = currentPageName === "VicinityMap";
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [showScrollTop, setShowScrollTop] = useState(false);
   const [faqOpen, setFaqOpen] = useState(false);
@@ -714,7 +715,7 @@ export default function Layout({ children, currentPageName }) {
   };
 
   return (
-    <div className="min-h-screen flex flex-col">
+    <div className={`min-h-screen flex flex-col ${isViewportFitPage ? "h-screen overflow-hidden" : ""}`}>
       <style>{`
         :root {
           --primary-green: #16a34a;
@@ -946,9 +947,10 @@ export default function Layout({ children, currentPageName }) {
       </nav>
 
       {/* Main Content */}
-      <main className="flex-1">{children}</main>
+      <main className={`flex-1 ${isViewportFitPage ? "min-h-0 overflow-hidden" : ""}`}>{children}</main>
 
       {/* Footer */}
+      {!isViewportFitPage ? (
       <footer className="relative text-white bg-[#15803d]">
         {/* Top accent line */}
         <div className="h-1 bg-gradient-to-r from-[#86efac] via-[#22c55e] to-[#86efac]" />
@@ -1051,6 +1053,7 @@ export default function Layout({ children, currentPageName }) {
           </div>
         </div>
       </footer>
+      ) : null}
 
       {/* ── Floating Buttons ── */}
       <style>{`

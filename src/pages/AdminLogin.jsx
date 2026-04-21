@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { signInWithEmailAndPassword, onAuthStateChanged } from "firebase/auth";
 import { ArrowLeft, LockKeyhole, Mail } from "lucide-react";
 import { auth } from "@/lib/firebase";
-import { getAdminLoginErrorMessage, isAuthorizedAdminUser } from "@/lib/adminAccess";
+import { getAdminLoginErrorMessage, isPrimaryAdminUser, isSupportAdminUser } from "@/lib/adminAccess";
 import { createPageUrl } from "../utils";
 import heroImg from "@/images/hero-properties.jpg";
 import logoImg from "@/images/logos/transparent-vicmar-logo.png";
@@ -26,8 +26,13 @@ export default function AdminLogin() {
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (user) => {
-      if (isAuthorizedAdminUser(user)) {
+      if (isPrimaryAdminUser(user)) {
         navigate(createPageUrl("AdminDashboard"), { replace: true });
+        return;
+      }
+
+      if (isSupportAdminUser(user)) {
+        navigate(createPageUrl("AdminMessages"), { replace: true });
         return;
       }
 
@@ -45,7 +50,12 @@ export default function AdminLogin() {
     try {
       const credential = await signInWithEmailAndPassword(auth, email.trim(), password);
 
-      if (!isAuthorizedAdminUser(credential.user)) {
+      if (isSupportAdminUser(credential.user)) {
+        navigate(createPageUrl("AdminMessages"), { replace: true });
+        return;
+      }
+
+      if (!isPrimaryAdminUser(credential.user)) {
         setErrorMessage(getAdminLoginErrorMessage());
         await auth.signOut();
         return;

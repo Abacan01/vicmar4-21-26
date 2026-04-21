@@ -9,14 +9,13 @@ import {
   LogOut,
   MapPinned,
   Menu,
-  MessageCircle,
   PhilippinePeso,
   Settings,
   Shield,
   X,
 } from "lucide-react";
 import { auth } from "@/lib/firebase";
-import { isAuthorizedAdminUser } from "@/lib/adminAccess";
+import { isPrimaryAdminUser } from "@/lib/adminAccess";
 import { createPageUrl } from "@/utils";
 import ModernLoader from "@/components/ModernLoader";
 import { subscribeToAdminNotifications } from "@/lib/notificationService";
@@ -39,11 +38,6 @@ const ADMIN_NAV_ITEMS = [
     page: "AdminPropertyPricing",
     label: "Unit Pricing",
     icon: PhilippinePeso,
-  },
-  {
-    page: "AdminMessages",
-    label: "Messages",
-    icon: MessageCircle,
   },
 ];
 
@@ -196,7 +190,7 @@ export default function AdminLayout({ currentPageName, children }) {
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (user) => {
-      const validAdminUser = isAuthorizedAdminUser(user) ? user : null;
+      const validAdminUser = isPrimaryAdminUser(user) ? user : null;
       setAdminUser(validAdminUser);
       setIsCheckingAuth(false);
 
@@ -218,7 +212,6 @@ export default function AdminLayout({ currentPageName, children }) {
       case "AdminDashboard": return { title: "Overview", subtitle: "Monitor your system metrics, manage properties, and support customers." };
       case "AdminSlots": return { title: "Slot Management", subtitle: "Update lot status, lot details, and slot pricing" };
       case "AdminPropertyPricing": return { title: "Unit Pricing", subtitle: "Update prices shown in Properties, Listings, and Property Detail pages" };
-      case "AdminMessages": return { title: "Messages", subtitle: "Real-time chat support and customer inquiries" };
       default: return { title: "Administration", subtitle: "" };
     }
   }, [activePage]);
